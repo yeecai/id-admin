@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  db:
+    # platform: linux/x86_64
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    restart: always
+    expose:
+      - "3306"
+    volumes:
+      - db:/var/lib/mysql
+      - ./user.sql:/docker-entrypoint-initdb.d/user.sql:ro
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+  web:
+    # platform: linux/x86_64
+    depends_on:
+      - db
+    build: .
+    ports:
+      - "3000:3000"
+volumes: 
+  db:

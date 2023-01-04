@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<head>
+    <title>KYC</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link href="http://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        body {
+            margin: 20px 100px;
+            font-family: Roboto, Tahoma;
+            font-size: 14px;
+        }
+
+        #form-dialog {
+            width: 500px;
+            border: 1px solid #555555;
+        }
+
+        #form-dialog::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .form-element {
+            margin: 0 0 30px 0;
+        }
+
+        .form-element label {
+            display: block;
+            width: 100%;
+            margin: 0 0 5px 0;
+        }
+
+        .form-element input[type="text"] {
+            display: block;
+            width: 100%;
+            font-size: inherit;
+            font-family: inherit;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-element select {
+            display: block;
+            width: 100%;
+            font-size: inherit;
+            font-family: inherit;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            background-color: white;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-element textarea {
+            display: block;
+            width: 100%;
+            font-size: inherit;
+            font-family: inherit;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            outline: none;
+            resize: none;
+            height: 200px;
+            box-sizing: border-box;
+        }
+
+        #submit-button {
+            background-color: #336699;
+            color: white;
+            cursor: pointer;
+            padding: 10px 15px;
+            font-family: inherit;
+            font-size: inherit;
+            border: none;
+            font-weight: 700;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 30px 0 0;
+        }
+
+        #close-button {
+            background-color: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+            border: none;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .form-button {
+            background-color: white;
+            color: #336699;
+            cursor: pointer;
+            padding: 10px;
+            font-family: inherit;
+            font-size: inherit;
+            border: 2px solid #336699;
+            font-weight: 700;
+            display: block;
+            width: 100px;
+            margin: 20px 5px;
+        }
+
+        #form-status {
+            text-align: center;
+            font-weight: 700;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="main-container">
+        <div class="form-body">
+            <form>
+                <div class="form-element">
+                    <label>Name</label>
+                    <input type="text" name="name" v-model="name" />
+                </div>
+                <div class="form-element">
+                    <label>Gov ID number</label>
+                    <input type="text" name="id_numb" v-model="id_num" />
+                </div>
+                <div class="form-element">
+                    <form>
+                        <label>Gov ID Picture</label>
+                        <input type="file" id="id_pic" name="filename">
+                        <button type="button" @click="handleUpload">Upload</button>
+                        <img v-if="id_pic" :src="id_pic" style="width: 200px;" />
+                    </form>
+                </div>
+            </form>
+        </div>
+        <dialog id="form-dialog" ref="dialog">
+            <form>
+                <div class="form-element">
+                    <label>Name</label>
+                    <input type="text" name="name" v-model="name" disabled />
+                </div>
+                <div class="form-element">
+                    <label>Gov ID number</label>
+                    <input type="text" name="id_num" v-model="id_num" disabled />
+                </div>
+                <div class="form-element">
+                    <label>Upload Gov ID</label>
+                    <img v-if="id_pic" :src="id_pic" style="width: 200px;" />
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <button class="form-button" type="button" @click="handleSubmit">Submit</button>
+                    <button class="form-button" type="button" @click="closeDialog">Close</button>
+                </div>
+            </form>
+        </dialog>
+        <button class="form-button" @click="openDialog">Confirm</button>
+        <div id="form-status">{{status}}</div>
+    </div>
+
+
+    <script>
+        const INIT_DATA = {
+            name: '',
+            id_num: '',
+            id_pic: '',
+            status: ''
+        }
+        new Vue({
+            el: '#main-container',
+            data: {
+                ...INIT_DATA
+            },
+            methods: {
+                handleUpload() {
+                    const data = new FormData()
+                    const input = document.querySelector('input[type="file"]')
+                    data.append('file', input.files[0])
+                    fetch('http://localhost:3000/api/users/upload', {
+                        method: 'POST',
+                        body: data,
+                        redirect: 'follow'
+                    }).then(response => response.json()).then(res => {
+                        console.log(res.data)
+                        this.id_pic = res.data
+                    })
+
+                },
+                handleSubmit() {
+                    fetch('http://localhost:3000/api/users', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name: this.name, id_num: this.id_num, id_pic: this.id_pic })
+                    }).then(response => response.json()).then(res => {
+                        if (res.statusCode = 200) {
+                            this.status = 'Form is submitted'
+                            this.$refs.dialog.close();
+                            this.name = INIT_DATA.name
+                            this.id_num = INIT_DATA.id_num
+                            this.id_pic = INIT_DATA.id_pic
+                            setTimeout(() => {
+                                this.status = ''
+                                // this.data = { ...INIT_DATA }
+                            }, 3000)
+                        }
+                    });
+                },
+                openDialog() {
+                    this.$refs.dialog.showModal();
+                },
+                closeDialog() {
+                    this.$refs.dialog.close();
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Admin Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+        body {
+            margin: 20px;
+        }
+
+        .form-element label {
+            display: block;
+            width: 100%;
+            margin: 0 0 5px 0;
+        }
+
+        .form-element input[type="text"] {
+            display: block;
+            width: 100%;
+            font-size: inherit;
+            font-family: inherit;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: #f6f4f0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 4px;
+            margin-top: 4px;
+        }
+
+        table tbody th {
+            color: #fff;
+            background-color: #555;
+            border: 1px solid #555;
+            font-size: 13px;
+            padding: 3px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        table td {
+            line-height: 2em;
+            min-width: 24px;
+            border: 1px solid #d4d4d4;
+            padding: 5px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+            vertical-align: top;
+        }
+
+        img {
+            width: 200px;
+            max-height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div v-if="!login">
+            <form>
+                <div class="form-element">
+                    <label>Name</label>
+                    <input type="text" name="name" v-model="name" />
+                </div>
+                <div class="form-element">
+                    <label>Password</label>
+                    <input type="password" name="name" v-model="password" />
+                </div>
+            </form>
+            <button @click="handleLogin" type="submit">Login</button>
+            <div>{{ status }}</div>
+        </div>
+
+        <div id="container" v-if="users.length && login">
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <th>Gov ID number </th>
+                        <th>Gov ID Picture</th>
+                    </tr>
+
+                    <tr v-for="(user) in users">
+                        <td>{{user.name}}</td>
+                        <td>{{user.id_num}}</td>
+                        <td v-if="user.id_pic"><img :src="user.id_pic" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            status: '',
+            name: 'admin',
+            password: 'pass',
+            login: false,
+            users: []
+        },
+        methods: {
+            handleLogin() {
+                if (this.name !== 'admin' || this.password !== 'pass') {
+                    this.status = 'Wrong username or password, please try again'
+                    setTimeout(() => {
+                        this.status = ''
+                    }, 3000)
+                } else {
+                    this.login = true
+                }
+            }
+        },
+        created() {
+            fetch('http://localhost:3000/api/users').then(response => response.json()).
+                then(res => {
+                    this.users = res
+                    // for (user of res) {
+                    //     const li = document.createElement('li')
+                    //     // const node = document.createTextNode(JSON.stringify(user))
+                    //     const node = document.createTextNode('name:' + name + user.name + ' ' + 'id picture')
+                    //     // const image = document.creat
+                    //     const img = document.createElement('img');
+                    //     img.style = "width: 100px; height: 100px"
+                    //     img.src = user.id_pic || '';
+                    //     li.appendChild(node)
+                    //     li.appendChild(img)
+                    //     container.appendChild(li)
+                    // }
+                })
+        }
+    })
+</script>
+
+</html>
