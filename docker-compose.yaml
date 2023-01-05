@@ -13,7 +13,7 @@ services:
       - db:/var/lib/mysql
       - ./user.sql:/docker-entrypoint-initdb.d/user.sql:ro
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
   web:
     # platform: linux/x86_64
