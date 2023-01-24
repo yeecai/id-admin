@@ -104,40 +104,49 @@
         el: '#app',
         data: {
             status: '',
-            name: 'admin',
-            password: 'pass',
+            name: 'yeee',
+            password: '1',
             login: false,
             users: []
         },
         methods: {
             handleLogin() {
-                if (this.name !== 'admin' || this.password !== 'pass') {
-                    this.status = 'Wrong username or password, please try again'
-                    setTimeout(() => {
-                        this.status = ''
-                    }, 3000)
-                } else {
-                    this.login = true
-                }
+                fetch('http://localhost:3000/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: this.name, passwd: this.password })
+                }).then(response => response.json()).then(res => this.getUsers(res.data.token))
+                this.login = true
+            },
+            getUsers(token) {
+                fetch('http://localhost:3000/api/users', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }).then(response => response.json()).
+                    then(res => {
+                        this.users = res
+                        this.login = true
+                        // for (user of res) {
+                        //     const li = document.createElement('li')
+                        //     // const node = document.createTextNode(JSON.stringify(user))
+                        //     const node = document.createTextNode('name:' + name + user.name + ' ' + 'id picture')
+                        //     // const image = document.creat
+                        //     const img = document.createElement('img');
+                        //     img.style = "width: 100px; height: 100px"
+                        //     img.src = user.id_pic || '';
+                        //     li.appendChild(node)
+                        //     li.appendChild(img)
+                        //     container.appendChild(li)
+                        // }
+                    })
             }
         },
         created() {
-            fetch('http://localhost:3000/api/users').then(response => response.json()).
-                then(res => {
-                    this.users = res
-                    // for (user of res) {
-                    //     const li = document.createElement('li')
-                    //     // const node = document.createTextNode(JSON.stringify(user))
-                    //     const node = document.createTextNode('name:' + name + user.name + ' ' + 'id picture')
-                    //     // const image = document.creat
-                    //     const img = document.createElement('img');
-                    //     img.style = "width: 100px; height: 100px"
-                    //     img.src = user.id_pic || '';
-                    //     li.appendChild(node)
-                    //     li.appendChild(img)
-                    //     container.appendChild(li)
-                    // }
-                })
+
         }
     })
 </script>

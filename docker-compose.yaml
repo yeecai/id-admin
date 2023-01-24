@@ -11,7 +11,7 @@ services:
       - "3306"
     volumes:
       - db:/var/lib/mysql
-      - ./user.sql:/docker-entrypoint-initdb.d/user.sql:ro
+      - ./sql/*.sql:/docker-entrypoint-initdb.d/*.sql:ro
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
